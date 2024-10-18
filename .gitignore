@@ -35,7 +35,7 @@ __pycache__/
 .threestudio_cache
 # C extensions
 *.so
-*.ckpt
+# *.ckpt
 *.pth
 *.ipynb
 *.ply
