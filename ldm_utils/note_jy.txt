@@ -1,0 +1,2 @@
+1. Prompt to train this personalization is 'photo of a sks {}' {} is man or woman
+
