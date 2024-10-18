@@ -220,7 +220,7 @@ outputs/
 outputs-gradio/
 
 # pretrained model weights
-*.ckpt
+# *.ckpt
 *.pt
 *.pth
 
