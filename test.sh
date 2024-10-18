@@ -1,1 +1,1 @@
-python launch.py --config custom/threestudio-3dface/configs/face_config_test.yaml --test --gpu 0 resume="./results/subject2/last.ckpt" data.single_view.image_path='./load/face/subject2_rgba.png'
+python launch.py --config custom/threestudio-3dface/configs/face_config_test.yaml --test --gpu 0 resume="./custom/threestudio-pshead/example/ckpts/last.ckpt" data.single_view.image_path='./custom/threestudio-pshead/face/subject2_rgba.png'

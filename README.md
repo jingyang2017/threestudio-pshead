@@ -1,6 +1,10 @@
 # threestudio-pshead
 
+## install env
+conda env create -f pshead_env.yml
+
 ## install threestudio
+
 ```
 https://github.com/threestudio-project/threestudio
 ```
