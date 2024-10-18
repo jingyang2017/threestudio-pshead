@@ -24,8 +24,9 @@ https://github.com/DSaurus/threestudio-4dfy
 preprocess_image.py
 ```
 ## dreambooth and blip
+```
 bash train_dreambooth.sh 
-
+```
 ## download face detection, coderfomer and recognition model.
 See pretrained/download
 
