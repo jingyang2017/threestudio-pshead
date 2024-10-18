@@ -1,7 +1,7 @@
 #!/bin/bash
 # Declare the lists
 id_list=('1_subject2')
-im_list=( 'subject2_rgba.png')
+im_list=('subject2_rgba.png')
 gd_list=('man')
 
 # Loop through the lists and run the commands

@@ -73,34 +73,15 @@ class SingleImageMultiViewCameraIterableDataset(IterableDataset, Updateable):
             multi = False
         
         if multi:
-            # batch =  self.train_dataset_4view.collate(batch)
             batch =  self.train_dataset_multi.collate(batch)
             if random.random()>0.5:
                 batch["is_video"] = True
             else:                
                 # batch =  self.train_dataset_front.collate(batch)
                 batch["is_video"] = False
-
-            # batch["is_video"] = False
-            # batch["single_view"] = False
             batch["single_view"] = False
 
-            # rand = random.random()
-            # if rand < 0.3:
-            #     batch =  self.train_dataset_multi.collate(batch)
-            # elif rand < 0.6:
-            #     # if self.train_dataset_multi.height==512:
-            #         # batch =  self.train_dataset_front.collate(batch)
-            #     # else:
-            # batch['is_video'] = True
-            # else:
-            #     batch =  self.train_dataset_4view.collate(batch)
-            
-            # batch =  self.train_dataset_multi.collate(batch)
-            # if random.random()>0.5:
-            #     batch["is_video"] = True  #vid diffusion
-            # else:
-            #     batch["is_video"] = False #zero123
+
         else:
             batch = self.train_dataset_single.collate(batch)
             batch["single_view"] = True
@@ -166,18 +147,3 @@ class SingleImageFixMultiviewCombinedCameraDataModule(pl.LightningDataModule):
         return self.general_loader(
             self.test_dataset, batch_size=None, collate_fn=self.test_dataset.collate
         )
-
-    # def val_dataloader(self) -> DataLoader:
-    #     return self.general_loader(
-    #         self.val_dataset, batch_size=self.val_dataset.n_view, collate_fn=self.val_dataset.collate
-    #     )
-
-    # def test_dataloader(self) -> DataLoader:
-    #     return self.general_loader(
-    #         self.test_dataset, batch_size=self.test_dataset.n_view, collate_fn=self.test_dataset.collate
-    #     )
-
-    # def predict_dataloader(self) -> DataLoader:
-    #     return self.general_loader(
-    #         self.test_dataset, batch_size=self.test_dataset.n_view, collate_fn=self.test_dataset.collate
-    #     )

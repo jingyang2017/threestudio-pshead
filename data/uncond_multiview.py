@@ -293,10 +293,6 @@ class FixMultiviewCameraIterableDataset(IterableDataset, Updateable):
             directions, c2w, keepdim=True, normalize=self.cfg.rays_d_normalize
         )
 
-        # FIXME: hard-coded near and far
-        # proj_mtx: Float[Tensor, "B 4 4"] = get_projection_matrix(
-        #     fovy, self.width / self.height, 0.1, 1000.0
-        # )  
         proj_mtx: Float[Tensor, "B 4 4"] = get_projection_matrix(
         fovy, self.width / self.height, 0.1, 100.0
         )
@@ -337,15 +333,6 @@ class FixMultiviewCameraIterableDataset(IterableDataset, Updateable):
         self.elevation_range = self.cfg.elevation_range
         self.azimuth_range = self.cfg.azimuth_range
         
-        # r = min(1.0, global_step / (self.cfg.progressive_until + 1))
-        # self.elevation_range = [
-        #     (1 - r) * self.cfg.eval_elevation_deg + r * self.cfg.elevation_range[0],
-        #     (1 - r) * self.cfg.eval_elevation_deg + r * self.cfg.elevation_range[1],
-        # ]
-        # self.azimuth_range = [
-        #     (1 - r) * 0.0 + r * self.cfg.azimuth_range[0],
-        #     (1 - r) * 0.0 + r * self.cfg.azimuth_range[1],
-        # ]
 
 @register("multiview-test")
 class MultiviewCameraDataset(Dataset):
@@ -404,26 +391,6 @@ class MultiviewCameraDataset(Dataset):
             ).repeat_interleave(self.cfg.n_view//24, dim=0)
             elevation = elevation_deg * math.pi / 180
         
-            # print('0')
-            # # otherwise sample uniformly on sphere
-            # elevation_range_percent = [
-            #     (self.elevation_range[0] + 90.0) / 180.0,
-            #     (self.elevation_range[1] + 90.0) / 180.0,
-            # ]
-            # # inverse transform sampling
-            # elevation = torch.asin(
-            #     2
-            #     * (
-            #         torch.randn(real_batch_size)
-            #         * (elevation_range_percent[1] - elevation_range_percent[0])
-            #         + elevation_range_percent[0]
-            #     )
-            #     - 1.0
-            # ).repeat_interleave(self.cfg.n_view, dim=0)
-            # elevation_deg = elevation / math.pi * 180.0
-
-        # print(elevation_deg)
-        # sample azimuth angles from a uniform distribution bounded by azimuth_range
         azimuth_deg: Float[Tensor, "B"]
 
         azimuth_deg = (
@@ -437,8 +404,6 @@ class MultiviewCameraDataset(Dataset):
 
         azimuth = azimuth_deg * math.pi / 180
 
-        ######## Different from original ########
-        # sample fovs from a uniform distribution bounded by fov_range
       
         fovy_deg: Float[Tensor, "B"] = (
             torch.zeros(real_batch_size) * (self.fovy_range[1] - self.fovy_range[0])
@@ -446,8 +411,6 @@ class MultiviewCameraDataset(Dataset):
         ).repeat_interleave(self.cfg.n_view, dim=0)
 
         fovy = fovy_deg * math.pi / 180
-
-        # sample distances from a uniform distribution bounded by distance_range
        
         camera_distances: Float[Tensor, "B"] = (
         torch.zeros(real_batch_size)
@@ -610,20 +573,7 @@ class MultiviewCameraDataset(Dataset):
         
 
 
-    # def __len__(self):
-    #     return len(self.mvp_mtx)
 
-    # def __getitem__(self, index):
-    
-    #     return {
-    #         "index": index,
-    #         "mvp_mtx": self.mvp_mtx[index],
-    #         "c2w": self.c2w[index],
-    #         "height": self.cfg.height,
-    #         "width": self.cfg.width,
-    #         "fovy": self.fovy[index],
-    #         # "single_view":False,
-    #     }
 
     def __len__(self):
         return 1
@@ -639,27 +589,10 @@ class MultiviewCameraDataset(Dataset):
         "single_view":False,
         }
     
-        # return {
-        #     "index": index,
-        #     "rays_o": self.rays_o[index],
-        #     "rays_d": self.rays_d[index],
-        #     "mvp_mtx": self.mvp_mtx[index],
-        #     "c2w": self.c2w[index],
-        #     "camera_positions": self.camera_positions[index],
-        #     "light_positions": self.light_positions[index],
-        #     "elevation": self.elevation_deg[index],
-        #     "azimuth": self.azimuth_deg[index],
-        #     "camera_distances": self.camera_distances[index],
-        #     "height": self.cfg.height,
-        #     "width": self.cfg.width,
-        #     "fovy": self.fovy,
-        #     "single_view":False,
-        # }
 
     def collate(self, batch):
         return batch
-        # batch = torch.utils.data.default_collate(batch)
-        # return batch
+
 
 
 @register("fix-multiview-camera-datamodule")
