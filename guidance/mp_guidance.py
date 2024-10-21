@@ -652,6 +652,48 @@ class LMKDiffusion(BaseObject):
         output = torch.concatenate(img_clean,dim=0)
         return output, lmk_list
   
+      def batch_refine(self, rgbs, guidance_lmks_projs, lmk3d, num_inference_steps=50, guidance_scale=7.5,control_scale=1,lmk_only=False):
+        #rgb: Float[Tensor, "B H W C"]
+        render_resolution = 512
+        noise_level = 200
+
+        lmk3d_1 = torch.cat((lmk3d,torch.ones_like(lmk3d)[:,0][:,None]),dim=1).unsqueeze(0)
+        xy = torch.matmul(lmk3d_1,guidance_lmks_projs)#w->img plane
+        xys = (xy[:,:,:3]/xy[:,:,2][:,None])[:,:2] #-1-1 (Nx478x2)
+        lmk_list = [xy for xy in xys]
+        if lmk_only:
+            return None, lmk_list
+        
+        control_list = []
+        for xy in xys:
+            xy = (xy+1)/2*render_resolution
+            xy_ = np.asarray(xy.cpu().data).astype(int)
+            # save 2d projection
+            image = draw_landmarks(np.zeros_like(cv_mat), xy_)
+            # Save image
+            # cv2.imwrite(f'/home/jy496/work/threestudio/debug/lmk_{idx}.png',image)
+            image = torch.from_numpy(image.copy()).float().to(self.device)
+            control = image.permute(2, 0, 1) / 255.0
+            control = control.unsqueeze(0)
+            control = control.to(self.dtype)
+            control_list.append(control)
+        control = torch.cat(control_list,dim=0)
+        t = torch.tensor([noise_level]*len(control), dtype=torch.long,device=self.device)
+        # predict the noise residual with unet, NO grad!    
+        origin_img = rgbs.permute(0,3,1,2)
+        latents = self.encode_imgs(origin_img)
+        text_embeddings = self.text_embeddings.repeat(latents.size(0),1,1)
+        with torch.no_grad():
+            noise = torch.randn_like(latents)
+            latents_noisy = self.scheduler.add_noise(latents, noise, t)
+            latents = self.denoise_latents(text_embeddings, noise_level, num_inference_steps=num_inference_steps,
+                                            guidance_scale=guidance_scale, latents=latents_noisy,control=control, control_scale=control_scale)
+
+        # Img latents -> imgs
+        img_clean = self.decode_latents(latents)  # [1, 3, 512, 512]
+
+        return output, lmk_list
+
 if __name__ == '__main__':
 
     import argparse
