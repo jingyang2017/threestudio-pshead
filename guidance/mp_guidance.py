@@ -622,7 +622,9 @@ class LMKDiffusion(BaseObject):
             xy = (xy+1)/2*render_resolution
             xy_ = np.asarray(xy.cpu().data).astype(int)
             # save 2d projection
-            image = draw_landmarks(np.zeros_like(cv_mat), xy_)
+            # image = draw_landmarks(np.zeros_like(cv_mat), xy_)
+            image = draw_landmarks(np.zeros((render_resolution,render_resolution,3)), xy_)
+
             # Save image
             # cv2.imwrite(f'/home/jy496/work/threestudio/debug/lmk_{idx}.png',image)
             image = torch.from_numpy(image.copy()).float().to(self.device)
@@ -652,11 +654,10 @@ class LMKDiffusion(BaseObject):
         output = torch.concatenate(img_clean,dim=0)
         return output, lmk_list
   
-      def batch_refine(self, rgbs, guidance_lmks_projs, lmk3d, num_inference_steps=50, guidance_scale=7.5,control_scale=1,lmk_only=False):
+    def batch_refine(self, rgbs, guidance_lmks_projs, lmk3d, num_inference_steps=50, guidance_scale=7.5,control_scale=1,lmk_only=False):
         #rgb: Float[Tensor, "B H W C"]
         render_resolution = 512
         noise_level = 200
-
         lmk3d_1 = torch.cat((lmk3d,torch.ones_like(lmk3d)[:,0][:,None]),dim=1).unsqueeze(0)
         xy = torch.matmul(lmk3d_1,guidance_lmks_projs)#w->img plane
         xys = (xy[:,:,:3]/xy[:,:,2][:,None])[:,:2] #-1-1 (Nx478x2)
@@ -669,7 +670,7 @@ class LMKDiffusion(BaseObject):
             xy = (xy+1)/2*render_resolution
             xy_ = np.asarray(xy.cpu().data).astype(int)
             # save 2d projection
-            image = draw_landmarks(np.zeros_like(cv_mat), xy_)
+            image = draw_landmarks(np.zeros((render_resolution,render_resolution,3)), xy_)
             # Save image
             # cv2.imwrite(f'/home/jy496/work/threestudio/debug/lmk_{idx}.png',image)
             image = torch.from_numpy(image.copy()).float().to(self.device)
@@ -677,7 +678,7 @@ class LMKDiffusion(BaseObject):
             control = control.unsqueeze(0)
             control = control.to(self.dtype)
             control_list.append(control)
-        control = torch.cat(control_list,dim=0)
+        control = torch.concatenate(control_list,dim=0)
         t = torch.tensor([noise_level]*len(control), dtype=torch.long,device=self.device)
         # predict the noise residual with unet, NO grad!    
         origin_img = rgbs.permute(0,3,1,2)
