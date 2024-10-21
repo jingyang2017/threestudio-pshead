@@ -567,8 +567,6 @@ class GSFace(BaseLift3DSystem):
                 # torchvision.utils.save_image(guidance_inp_frontal.data, './debug/lmk_check_in.png', normalize=True)
                 # torchvision.utils.save_image(guidance_out.data, './debug/lmk_check_out.png', normalize=True)
 
-
-
                 # for 2d to 3d projection, consistency
                 # if self.global_step>0:
                 #     if self.global_step<=1500:

@@ -67,7 +67,7 @@ class codeformer_sr(BaseObject):
         
         img_ = cropped_face.detach().cpu().permute(0, 2, 3, 1).numpy()
         img_ = (img_ * 255).round().astype('uint8')[0]
-        PIL.Image.fromarray(img_).save(f'/home/jy496/work/threestudio/debug/src_{idx}.png')
+        # PIL.Image.fromarray(img_).save(f'/home/jy496/work/threestudio/debug/src_{idx}.png')
             
         return cropped_face #bchw
 
