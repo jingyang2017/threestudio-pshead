@@ -506,7 +506,6 @@ class GSFace(BaseLift3DSystem):
                         rgb_as_latents=False,
                         guidance_eval=True,
                     )
-                
 
                 set_loss("zero123", guidance_out["loss_sds"])
 

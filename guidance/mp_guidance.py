@@ -605,11 +605,12 @@ class LMKDiffusion(BaseObject):
         # idx_sel = []
         lmk_list = []
         for idx in range(len(rgbs)):
-            image = np.asarray((rgbs[idx].cpu().data)*255.0)
-            cv_mat = np.ascontiguousarray(image.astype(np.uint8))
-            origin_img = torch.from_numpy(cv_mat).permute(2, 0, 1).unsqueeze(0).float().to(self.device)  # --> 0,1
-            origin_img = origin_img / 255.0
-            origin_img = origin_img.to(self.dtype)
+            # image = np.asarray((rgbs[idx].cpu().data)*255.0)
+            # cv_mat = np.ascontiguousarray(image.astype(np.uint8))
+            # origin_img = torch.from_numpy(cv_mat).permute(2, 0, 1).unsqueeze(0).float().to(self.device)  # --> 0,1
+            # origin_img = origin_img / 255.0
+            # origin_img = origin_img.to(self.dtype)
+            origin_img = rgbs[idx].permute(2,0,1).unsqueeze(0)
             latents = self.encode_imgs(origin_img)
             # print(latents.size())
             lmk3d_1 = torch.cat((lmk3d,torch.ones_like(lmk3d)[:,0][:,None]),dim=1)
