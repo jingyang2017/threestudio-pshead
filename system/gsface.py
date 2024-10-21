@@ -254,7 +254,7 @@ class GSFace(BaseLift3DSystem):
             camera_center=cam_p,
         )
         b = torch.matmul(cam_rel_points,torch.inverse(w2c))
-        lmk3d = (b/b[:,3][:,None])[:,:3]
+        lmk3d = (b/b[:,3][:,None])[:,:3] #homogeneous coordinates
         return lmk3d, viewpoint_cam.full_proj_transform
 
     def configure_optimizers(self):
@@ -570,25 +570,25 @@ class GSFace(BaseLift3DSystem):
 
 
                 # for 2d to 3d projection, consistency
-                if self.global_step>0:
-                    if self.global_step<=1500:
-                        loss_lmk = 0
-                        _,lmk2d_preds = self.guidance_lmk.refine(guidance_inp_frontal,guidance_lmks_projs,lmk3d,lmk_only=True)
-                    loss_lmk3d = 0
-                    for i_lmk, lmk2d in enumerate(lmk2d_preds):
-                        lmk3d_i, _ = self.lmk2d_to_lmk3d(out['comp_depth'][i_lmk+8].unsqueeze(0), lmk2d, fovy = batch["fovy"][i_lmk+8],c2w = batch["c2w"][i_lmk+8])
-                        lmk3d_1 = torch.cat((lmk3d_i,torch.ones_like(lmk3d_i)[:,0][:,None].cuda()),dim=1)
-                        xy = torch.matmul(lmk3d_1,out_ref["full_proj_transforms"][0])#w->img plane
-                        xy = (xy[:,:3]/xy[:,2][:,None])[:,:2] #-1-1
-                        # print(xy.device,self.q.device)
-                        # print(min(xy[:,0]),max(xy[:,0]))
-                        # print(min(self.lmk[:,0]),max(self.lmk[:,0]))
-                        xy = xy.clamp(-1,1)
-                        loss_lmk3d+= F.mse_loss(lmk3d_i,lmk3d)+F.mse_loss(xy,self.lmk.to(self.device))
-                    loss_lmk = loss_lmk+loss_lmk3d/len(lmk2d_preds)
-                    if self.global_step%20==0:
-                        vertices = lmk3d
-                        self.wis3d.add_point_cloud(vertices,name='lmk3d')
+                # if self.global_step>0:
+                #     if self.global_step<=1500:
+                #         loss_lmk = 0
+                #         _,lmk2d_preds = self.guidance_lmk.refine(guidance_inp_frontal,guidance_lmks_projs,lmk3d,lmk_only=True)
+                #     loss_lmk3d = 0
+                #     for i_lmk, lmk2d in enumerate(lmk2d_preds):
+                #         lmk3d_i, _ = self.lmk2d_to_lmk3d(out['comp_depth'][i_lmk+8].unsqueeze(0), lmk2d, fovy = batch["fovy"][i_lmk+8],c2w = batch["c2w"][i_lmk+8])
+                #         lmk3d_1 = torch.cat((lmk3d_i,torch.ones_like(lmk3d_i)[:,0][:,None].cuda()),dim=1)
+                #         xy = torch.matmul(lmk3d_1,out_ref["full_proj_transforms"][0])#w->img plane
+                #         xy = (xy[:,:3]/xy[:,2][:,None])[:,:2] #-1-1
+                #         # print(xy.device,self.q.device)
+                #         # print(min(xy[:,0]),max(xy[:,0]))
+                #         # print(min(self.lmk[:,0]),max(self.lmk[:,0]))
+                #         xy = xy.clamp(-1,1)
+                #         loss_lmk3d+= F.mse_loss(lmk3d_i,lmk3d)+F.mse_loss(xy,self.lmk.to(self.device))
+                #     loss_lmk = loss_lmk+loss_lmk3d/len(lmk2d_preds)
+                #     if self.global_step%20==0:
+                #         vertices = lmk3d
+                #         self.wis3d.add_point_cloud(vertices,name='lmk3d')
                 set_loss("lmk", loss_lmk)
 
 

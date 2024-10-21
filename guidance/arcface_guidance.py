@@ -227,10 +227,6 @@ class arcface_id(BaseObject):
         feats = F.normalize(feats, p=2, dim=-1)
         return feats
     
-        #     sim = self.src_feats @ feats.t()
-        #     loss_identity = 1 - sim.mean()
-        #     loss = loss + self.opt.lambda_identity * loss_identity
-
 
 if __name__ == '__main__':
     import argparse
